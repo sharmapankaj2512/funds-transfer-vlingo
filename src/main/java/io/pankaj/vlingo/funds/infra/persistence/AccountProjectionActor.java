@@ -8,14 +8,15 @@
 package io.pankaj.vlingo.funds.infra.persistence;
 
 import io.pankaj.vlingo.funds.infra.AccountData;
+import io.pankaj.vlingo.funds.model.Account.AccountOpened;
+import io.pankaj.vlingo.funds.model.Account.AmountDeposited;
+import io.pankaj.vlingo.funds.model.Account.AmountWithdrawn;
 import io.pankaj.vlingo.funds.model.AccountState;
 import io.vlingo.lattice.model.projection.Projectable;
 import io.vlingo.lattice.model.projection.StateStoreProjectionActor;
 
-import static io.pankaj.vlingo.funds.model.Account.Operation;
-
 public class AccountProjectionActor extends StateStoreProjectionActor<AccountData> {
-    private Operation becauseOf;
+    private String becauseOf;
 
     public AccountProjectionActor() {
         super(QueryModelStoreProvider.instance().store);
@@ -23,7 +24,7 @@ public class AccountProjectionActor extends StateStoreProjectionActor<AccountDat
 
     @Override
     protected AccountData currentDataFor(Projectable projectable) {
-        becauseOf = Operation.valueOf(projectable.becauseOf()[0]);
+        becauseOf = projectable.becauseOf()[0];
         final AccountState state = projectable.object();
         final AccountData current = AccountData.from(state);
         return current;
@@ -32,19 +33,14 @@ public class AccountProjectionActor extends StateStoreProjectionActor<AccountDat
     @Override
     protected AccountData merge(AccountData previousData, int previousVersion, AccountData currentData, int currentVersion) {
         AccountData merged;
-
-        switch (becauseOf) {
-            case AccountOpened:
-                merged = currentData;
-                break;
-            case AmountDeposited:
-                merged = AccountData.from(previousData.id, previousData.userId, currentData.balance);
-                break;
-            case AmountWithdrawn:
-                merged = AccountData.from(previousData.id, previousData.userId, currentData.balance);
-                break;
-            default:
-                merged = currentData;
+        if (AccountOpened.class.getSimpleName().equals(becauseOf)) {
+            merged = currentData;
+        } else if (AmountDeposited.class.getSimpleName().equals(becauseOf)) {
+            merged = AccountData.from(previousData.id, previousData.userId, currentData.balance);
+        } else if (AmountWithdrawn.class.getSimpleName().equals(becauseOf)) {
+            merged = AccountData.from(previousData.id, previousData.userId, currentData.balance);
+        } else {
+            merged = currentData;
         }
 
         return merged;

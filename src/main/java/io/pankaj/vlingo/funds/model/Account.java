@@ -5,6 +5,7 @@ import io.vlingo.actors.Definition;
 import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
+import io.vlingo.lattice.model.DomainEvent;
 
 public interface Account {
     static Completes<AccountState> openFor(Stage stage, String userId) {
@@ -26,9 +27,7 @@ public interface Account {
 
     void credit(float amount, FundsTransfer fundsTransfer);
 
-    enum Operation {
-        AccountOpened,
-        AmountDeposited,
-        AmountWithdrawn;
-    }
+    class AccountOpened extends DomainEvent {}
+    class AmountDeposited extends DomainEvent {}
+    class AmountWithdrawn extends DomainEvent {}
 }

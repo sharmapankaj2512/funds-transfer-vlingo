@@ -36,9 +36,9 @@ public class ProjectionDispatcherProvider {
         final List<ProjectToDescription> descriptions =
                 Arrays.asList(new ProjectToDescription(
                         AccountProjectionActor.class,
-                        Account.Operation.AccountOpened.name(),
-                        Account.Operation.AmountDeposited.name(),
-                        Account.Operation.AmountWithdrawn.name()));
+                        Account.AccountOpened.class.getSimpleName(),
+                        Account.AmountDeposited.class.getSimpleName(),
+                        Account.AmountWithdrawn.class.getSimpleName()));
 
         final Protocols dispatcherProtocols =
                 stage.actorFor(

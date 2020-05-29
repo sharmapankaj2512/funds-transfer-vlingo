@@ -3,7 +3,14 @@ package io.pankaj.vlingo.funds.model;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
 import io.vlingo.common.Success;
+import io.vlingo.lattice.model.DomainEvent;
 import io.vlingo.lattice.model.stateful.StatefulEntity;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 public class AccountEntity extends StatefulEntity<AccountState> implements Account {
     private AccountState state;
@@ -21,7 +28,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     @Override
     public Completes<AccountState> openFor(String userId) {
         if (state == null) {
-            return apply(AccountState.has(id, userId), Operation.AccountOpened.name(), () -> state);
+            return applyHelper(AccountState.has(id, userId), new AccountOpened());
         } else {
             return completes().with(state);
         }
@@ -31,7 +38,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     public Completes<Outcome<RuntimeException, AccountState>> credit(float amount) {
         Outcome<RuntimeException, AccountState> outcome = state.deposit(amount);
         if (outcome instanceof Success)
-            return apply(outcome.get(), Operation.AmountDeposited.name(), () -> outcome);
+            return applyHelper(outcome, new AmountDeposited());
         else return completes().with(outcome);
     }
 
@@ -39,7 +46,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     public Completes<Outcome<RuntimeException, AccountState>> debit(float amount) {
         Outcome<RuntimeException, AccountState> outcome = state.withdraw(amount);
         if (outcome instanceof Success)
-            return apply(outcome.get(), Operation.AmountWithdrawn.name(), () -> outcome);
+            return applyHelper(outcome, new AmountWithdrawn());
         else return completes().with(outcome);
     }
 
@@ -47,7 +54,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     public void debit(float amount, FundsTransfer fundsTransfer, Account to) {
         Outcome<RuntimeException, AccountState> outcome = state.withdraw(amount);
         if (outcome instanceof Success) {
-            apply(outcome.get(), Operation.AmountWithdrawn.name());
+            apply(outcome.get(), singletonList(new AmountWithdrawn()));
             fundsTransfer.amountDebited(to, amount);
         } else fundsTransfer.debitFailed();
     }
@@ -56,7 +63,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     public void credit(float amount, FundsTransfer fundsTransfer) {
         Outcome<RuntimeException, AccountState> outcome = state.deposit(amount);
         if (outcome instanceof Success) {
-            apply(outcome.get(), Operation.AmountDeposited.name());
+            apply(outcome.get(), singletonList(new AmountDeposited()));
             fundsTransfer.completed();
         } else fundsTransfer.creditFailed();
     }
@@ -69,5 +76,14 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     @Override
     protected Class<AccountState> stateType() {
         return AccountState.class;
+    }
+
+    private Completes<AccountState> applyHelper(AccountState state, DomainEvent event) {
+        return apply(state, singletonList(event), event.getClass().getSimpleName(), () -> state);
+    }
+
+    private Completes<Outcome<RuntimeException, AccountState>> applyHelper(
+            Outcome<RuntimeException, AccountState> outcome, DomainEvent event) {
+        return apply(outcome.get(), singletonList(event), event.getClass().getSimpleName(), () -> outcome);
     }
 }
