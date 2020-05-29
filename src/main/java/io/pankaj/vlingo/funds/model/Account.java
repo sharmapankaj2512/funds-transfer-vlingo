@@ -20,8 +20,11 @@ public interface Account {
 
     Completes<Outcome<RuntimeException, AccountState>> deposit(float amount);
 
+    Completes<Outcome<RuntimeException, AccountState>> withdraw(float amount);
+
     enum Operation {
         AccountOpened,
-        AmountDeposited;
+        AmountDeposited,
+        AmountWithdrawn;
     }
 }

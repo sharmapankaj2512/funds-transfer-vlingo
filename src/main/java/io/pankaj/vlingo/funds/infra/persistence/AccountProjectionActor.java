@@ -24,10 +24,8 @@ public class AccountProjectionActor extends StateStoreProjectionActor<AccountDat
     @Override
     protected AccountData currentDataFor(Projectable projectable) {
         becauseOf = Operation.valueOf(projectable.becauseOf()[0]);
-
         final AccountState state = projectable.object();
         final AccountData current = AccountData.from(state);
-
         return current;
     }
 
@@ -38,6 +36,12 @@ public class AccountProjectionActor extends StateStoreProjectionActor<AccountDat
         switch (becauseOf) {
             case AccountOpened:
                 merged = currentData;
+                break;
+            case AmountDeposited:
+                merged = AccountData.from(previousData.id, previousData.userId, currentData.balance);
+                break;
+            case AmountWithdrawn:
+                merged = AccountData.from(previousData.id, previousData.userId, currentData.balance);
                 break;
             default:
                 merged = currentData;

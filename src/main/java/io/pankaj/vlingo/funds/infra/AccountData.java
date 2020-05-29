@@ -17,6 +17,10 @@ public class AccountData {
         return new AccountData(state.id, state.userId, state.balance);
     }
 
+    public static AccountData from(String id, String userId, float balance) {
+        return new AccountData(id, userId, balance);
+    }
+
     public static AccountData empty() {
         return new AccountData("", "", 0);
     }

@@ -35,7 +35,8 @@ public class AccountResource {
         return resource("Account Resource",
                 post("/accounts").body(AccountData.class).handle(this::openAccount),
                 get("/accounts/{accountId}").param(String.class).handle(this::getAccount),
-                patch("/accounts/{accountId}/balance/{amount}").param(String.class).param(Float.class).handle(this::deposit));
+                patch("/accounts/{accountId}/balance/{amount}").param(String.class).param(Float.class).handle(this::deposit),
+                delete("/accounts/{accountId}/balance/{amount}").param(String.class).param(Float.class).handle(this::withdraw));
     }
 
     private Completes<Response> openAccount(AccountData data) {
@@ -48,6 +49,15 @@ public class AccountResource {
 
     private Completes<Response> deposit(String id, Float amount) {
         return resolve(id).andThenTo(account -> account.deposit(amount))
+                .recoverFrom(ex -> Failure.of(new IllegalArgumentException(ex)))
+                .andThenTo(maybeAccount -> Completes.withSuccess(maybeAccount.resolve(
+                        ex -> Response.of(BadRequest, serialized(ex.getMessage())),
+                        state -> Response.of(Ok, serialized(state)))))
+                .otherwise(noGreeting -> Response.of(NotFound, "/accounts/" + id));
+    }
+
+    private Completes<Response> withdraw(String id, Float amount) {
+        return resolve(id).andThenTo(account -> account.withdraw(amount))
                 .recoverFrom(ex -> Failure.of(new IllegalArgumentException(ex)))
                 .andThenTo(maybeAccount -> Completes.withSuccess(maybeAccount.resolve(
                         ex -> Response.of(BadRequest, serialized(ex.getMessage())),

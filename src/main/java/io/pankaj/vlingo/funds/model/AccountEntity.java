@@ -36,6 +36,14 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     }
 
     @Override
+    public Completes<Outcome<RuntimeException, AccountState>> withdraw(float amount) {
+        Outcome<RuntimeException, AccountState> outcome = state.withdraw(amount);
+        if (outcome instanceof Success)
+            return apply(outcome.get(), Operation.AmountWithdrawn.name(), () -> outcome);
+        else return completes().with(outcome);
+    }
+
+    @Override
     protected void state(AccountState state) {
         this.state = state;
     }

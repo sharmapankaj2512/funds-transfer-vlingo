@@ -50,7 +50,7 @@ public class Bootstrap {
   }
 
   private Bootstrap(int port) {
-    this.world = World.startWithDefaults("hello-world");
+    this.world = World.startWithDefaults("accounts");
 
     registry = new StatefulTypeRegistry(world);
 
