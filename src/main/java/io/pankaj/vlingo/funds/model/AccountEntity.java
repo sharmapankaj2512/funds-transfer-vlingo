@@ -6,10 +6,6 @@ import io.vlingo.common.Success;
 import io.vlingo.lattice.model.DomainEvent;
 import io.vlingo.lattice.model.stateful.StatefulEntity;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import static java.util.Collections.singletonList;
 
 public class AccountEntity extends StatefulEntity<AccountState> implements Account {
@@ -38,7 +34,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     public Completes<Outcome<RuntimeException, AccountState>> credit(float amount) {
         Outcome<RuntimeException, AccountState> outcome = state.deposit(amount);
         if (outcome instanceof Success)
-            return applyHelper(outcome, new AmountDeposited());
+            return applyHelper(outcome, new AmountCredited());
         else return completes().with(outcome);
     }
 
@@ -46,7 +42,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     public Completes<Outcome<RuntimeException, AccountState>> debit(float amount) {
         Outcome<RuntimeException, AccountState> outcome = state.withdraw(amount);
         if (outcome instanceof Success)
-            return applyHelper(outcome, new AmountWithdrawn());
+            return applyHelper(outcome, new AmountDebited());
         else return completes().with(outcome);
     }
 
@@ -54,7 +50,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     public void debit(float amount, FundsTransfer fundsTransfer, Account to) {
         Outcome<RuntimeException, AccountState> outcome = state.withdraw(amount);
         if (outcome instanceof Success) {
-            apply(outcome.get(), singletonList(new AmountWithdrawn()));
+            apply(outcome.get(), singletonList(new AmountDebited()));
             fundsTransfer.amountDebited(to, amount);
         } else fundsTransfer.debitFailed();
     }
@@ -63,7 +59,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     public void credit(float amount, FundsTransfer fundsTransfer) {
         Outcome<RuntimeException, AccountState> outcome = state.deposit(amount);
         if (outcome instanceof Success) {
-            apply(outcome.get(), singletonList(new AmountDeposited()));
+            apply(outcome.get(), singletonList(new AmountCredited()));
             fundsTransfer.completed();
         } else fundsTransfer.creditFailed();
     }

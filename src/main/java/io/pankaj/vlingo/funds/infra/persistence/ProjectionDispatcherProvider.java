@@ -37,8 +37,8 @@ public class ProjectionDispatcherProvider {
                 Arrays.asList(new ProjectToDescription(
                         AccountProjectionActor.class,
                         Account.AccountOpened.class.getSimpleName(),
-                        Account.AmountDeposited.class.getSimpleName(),
-                        Account.AmountWithdrawn.class.getSimpleName()));
+                        Account.AmountCredited.class.getSimpleName(),
+                        Account.AmountDebited.class.getSimpleName()));
 
         final Protocols dispatcherProtocols =
                 stage.actorFor(

@@ -28,6 +28,6 @@ public interface Account {
     void credit(float amount, FundsTransfer fundsTransfer);
 
     class AccountOpened extends DomainEvent {}
-    class AmountDeposited extends DomainEvent {}
-    class AmountWithdrawn extends DomainEvent {}
+    class AmountCredited extends DomainEvent {}
+    class AmountDebited extends DomainEvent {}
 }
