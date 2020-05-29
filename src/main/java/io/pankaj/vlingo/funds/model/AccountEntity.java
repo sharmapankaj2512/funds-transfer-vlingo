@@ -28,7 +28,7 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     }
 
     @Override
-    public Completes<Outcome<RuntimeException, AccountState>> deposit(float amount) {
+    public Completes<Outcome<RuntimeException, AccountState>> credit(float amount) {
         Outcome<RuntimeException, AccountState> outcome = state.deposit(amount);
         if (outcome instanceof Success)
             return apply(outcome.get(), Operation.AmountDeposited.name(), () -> outcome);
@@ -36,11 +36,29 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     }
 
     @Override
-    public Completes<Outcome<RuntimeException, AccountState>> withdraw(float amount) {
+    public Completes<Outcome<RuntimeException, AccountState>> debit(float amount) {
         Outcome<RuntimeException, AccountState> outcome = state.withdraw(amount);
         if (outcome instanceof Success)
             return apply(outcome.get(), Operation.AmountWithdrawn.name(), () -> outcome);
         else return completes().with(outcome);
+    }
+
+    @Override
+    public void debit(float amount, FundsTransfer fundsTransfer, Account to) {
+        Outcome<RuntimeException, AccountState> outcome = state.withdraw(amount);
+        if (outcome instanceof Success) {
+            apply(outcome.get(), Operation.AmountWithdrawn.name());
+            fundsTransfer.amountDebited(to, amount);
+        } else fundsTransfer.debitFailed();
+    }
+
+    @Override
+    public void credit(float amount, FundsTransfer fundsTransfer) {
+        Outcome<RuntimeException, AccountState> outcome = state.deposit(amount);
+        if (outcome instanceof Success) {
+            apply(outcome.get(), Operation.AmountDeposited.name());
+            fundsTransfer.completed();
+        } else fundsTransfer.creditFailed();
     }
 
     @Override

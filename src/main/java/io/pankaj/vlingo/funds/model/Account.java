@@ -18,9 +18,13 @@ public interface Account {
 
     Completes<AccountState> openFor(String userId);
 
-    Completes<Outcome<RuntimeException, AccountState>> deposit(float amount);
+    Completes<Outcome<RuntimeException, AccountState>> credit(float amount);
 
-    Completes<Outcome<RuntimeException, AccountState>> withdraw(float amount);
+    Completes<Outcome<RuntimeException, AccountState>> debit(float amount);
+
+    void debit(float balance, FundsTransfer fundsTransfer, Account to);
+
+    void credit(float amount, FundsTransfer fundsTransfer);
 
     enum Operation {
         AccountOpened,

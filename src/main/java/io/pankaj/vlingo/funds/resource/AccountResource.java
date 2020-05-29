@@ -48,7 +48,7 @@ public class AccountResource {
     }
 
     private Completes<Response> deposit(String id, Float amount) {
-        return resolve(id).andThenTo(account -> account.deposit(amount))
+        return resolve(id).andThenTo(account -> account.credit(amount))
                 .recoverFrom(ex -> Failure.of(new IllegalArgumentException(ex)))
                 .andThenTo(maybeAccount -> Completes.withSuccess(maybeAccount.resolve(
                         ex -> Response.of(BadRequest, serialized(ex.getMessage())),
@@ -57,7 +57,7 @@ public class AccountResource {
     }
 
     private Completes<Response> withdraw(String id, Float amount) {
-        return resolve(id).andThenTo(account -> account.withdraw(amount))
+        return resolve(id).andThenTo(account -> account.debit(amount))
                 .recoverFrom(ex -> Failure.of(new IllegalArgumentException(ex)))
                 .andThenTo(maybeAccount -> Completes.withSuccess(maybeAccount.resolve(
                         ex -> Response.of(BadRequest, serialized(ex.getMessage())),

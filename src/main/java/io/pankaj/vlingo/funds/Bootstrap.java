@@ -11,6 +11,7 @@ import io.pankaj.vlingo.funds.infra.persistence.CommandModelStoreProvider;
 import io.pankaj.vlingo.funds.infra.persistence.ProjectionDispatcherProvider;
 import io.pankaj.vlingo.funds.infra.persistence.QueryModelStoreProvider;
 import io.pankaj.vlingo.funds.resource.AccountResource;
+import io.pankaj.vlingo.funds.resource.FundsTransferResource;
 import io.vlingo.actors.World;
 import io.vlingo.http.resource.Resources;
 import io.vlingo.http.resource.Server;
@@ -58,12 +59,14 @@ public class Bootstrap {
     CommandModelStoreProvider.using(world.stage(), registry, ProjectionDispatcherProvider.using(world.stage()).storeDispatcher);
 
     AccountResource accountResource = new AccountResource(this.world);
+    FundsTransferResource transferResource = new FundsTransferResource(this.world);
 
     this.server =
             Server.startWithAgent(
                     world.stage(),
                     Resources.are(
-                            accountResource.routes()),
+                            accountResource.routes(),
+                            transferResource.routes()),
                     port,
                     2);
 
