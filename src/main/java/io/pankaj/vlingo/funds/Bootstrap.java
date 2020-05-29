@@ -50,7 +50,7 @@ public class Bootstrap {
   }
 
   private Bootstrap(int port) {
-    this.world = World.startWithDefaults("accounts");
+    this.world = World.startWithDefaults("funds-transfer");
 
     registry = new StatefulTypeRegistry(world);
 
@@ -70,7 +70,7 @@ public class Bootstrap {
     registerShutdownHook();
 
     world.defaultLogger().info("============================================");
-    world.defaultLogger().info("Started hello-world service on port " + port );
+    world.defaultLogger().info("Started funds-transfer service on port " + port );
     world.defaultLogger().info("============================================");
   }
 
@@ -83,7 +83,7 @@ public class Bootstrap {
 
           world.defaultLogger().info("\n");
           world.defaultLogger().info("========================");
-          world.defaultLogger().info("Stopping hello-world... ");
+          world.defaultLogger().info("Stopping funds-transfer... ");
           world.defaultLogger().info("========================");
           
           world.terminate();
