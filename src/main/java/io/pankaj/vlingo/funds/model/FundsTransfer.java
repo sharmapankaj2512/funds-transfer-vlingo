@@ -4,6 +4,7 @@ import io.vlingo.actors.Address;
 import io.vlingo.actors.Definition;
 import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
+import io.vlingo.lattice.model.Command;
 
 public interface FundsTransfer {
     static Completes<FundsTransferState> initiate(Stage stage, Account from, Account to, float amount) {
@@ -12,16 +13,30 @@ public interface FundsTransfer {
                 Definition.has(
                         FundsTransferEntity.class,
                         Definition.parameters(address.idString())), address);
-        return transfer.initiate(from, to, amount);
+        return transfer.initiate(new FundsTransferCommand(from, to, amount, transfer));
     }
 
-    Completes<FundsTransferState> initiate(Account from, Account to, float amount);
+    Completes<FundsTransferState> initiate(FundsTransferCommand command);
 
-    void amountDebited(Account to, float amount);
+    void amountDebited(FundsTransferCommand command);
 
-    void debitFailed();
+    void debitFailed(FundsTransferCommand command);
 
-    void completed();
+    void completed(FundsTransferCommand command);
 
-    void creditFailed();
+    void creditFailed(FundsTransferCommand command);
+
+    class FundsTransferCommand extends Command {
+        public final Account from;
+        public final Account to;
+        public final float amount;
+        public final FundsTransfer transfer;
+
+        public FundsTransferCommand(Account from, Account to, float amount, FundsTransfer transfer) {
+            this.from = from;
+            this.to = to;
+            this.amount = amount;
+            this.transfer = transfer;
+        }
+    }
 }

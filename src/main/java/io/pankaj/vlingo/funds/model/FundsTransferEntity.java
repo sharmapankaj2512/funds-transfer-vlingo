@@ -1,6 +1,7 @@
 package io.pankaj.vlingo.funds.model;
 
 import io.vlingo.common.Completes;
+import io.vlingo.lattice.model.Command;
 import io.vlingo.lattice.model.stateful.StatefulEntity;
 
 public class FundsTransferEntity extends StatefulEntity<FundsTransferState> implements FundsTransfer {
@@ -27,10 +28,10 @@ public class FundsTransferEntity extends StatefulEntity<FundsTransferState> impl
     }
 
     @Override
-    public Completes<FundsTransferState> initiate(Account from, Account to, float amount) {
+    public Completes<FundsTransferState> initiate(FundsTransferCommand command) {
         if (state == null) {
             return apply(FundsTransferState.has(id), () -> {
-                from.debit(amount, selfAs(FundsTransfer.class), to);
+                command.from.debit(command);
                 return state;
             });
         } else {
@@ -39,23 +40,23 @@ public class FundsTransferEntity extends StatefulEntity<FundsTransferState> impl
     }
 
     @Override
-    public void amountDebited(Account to, float amount) {
+    public void amountDebited(FundsTransferCommand command) {
         apply(FundsTransferState.debitSucceeded(id));
-        to.credit(amount, selfAs(FundsTransfer.class));
+        command.to.credit(command);
     }
 
     @Override
-    public void debitFailed() {
+    public void debitFailed(FundsTransferCommand command) {
         apply(FundsTransferState.debitFailed(id));
     }
 
     @Override
-    public void completed() {
+    public void completed(FundsTransferCommand command) {
         apply(FundsTransferState.completed(id));
     }
 
     @Override
-    public void creditFailed() {
+    public void creditFailed(FundsTransferCommand command) {
         apply(FundsTransferState.creditFailed(id));
     }
 }

@@ -1,5 +1,6 @@
 package io.pankaj.vlingo.funds.model;
 
+import io.pankaj.vlingo.funds.model.FundsTransfer.FundsTransferCommand;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
 import io.vlingo.common.Success;
@@ -47,21 +48,21 @@ public class AccountEntity extends StatefulEntity<AccountState> implements Accou
     }
 
     @Override
-    public void debit(float amount, FundsTransfer fundsTransfer, Account to) {
-        Outcome<RuntimeException, AccountState> outcome = state.withdraw(amount);
+    public void debit(FundsTransferCommand command) {
+        Outcome<RuntimeException, AccountState> outcome = state.withdraw(command.amount);
         if (outcome instanceof Success) {
-            apply(outcome.get(), singletonList(new AmountDebited()));
-            fundsTransfer.amountDebited(to, amount);
-        } else fundsTransfer.debitFailed();
+            apply(outcome.get(), singletonList(new AmountDebited()), AmountDebited.class.getSimpleName());
+            command.transfer.amountDebited(command);
+        } else command.transfer.debitFailed(command);
     }
 
     @Override
-    public void credit(float amount, FundsTransfer fundsTransfer) {
-        Outcome<RuntimeException, AccountState> outcome = state.deposit(amount);
+    public void credit(FundsTransferCommand command) {
+        Outcome<RuntimeException, AccountState> outcome = state.deposit(command.amount);
         if (outcome instanceof Success) {
-            apply(outcome.get(), singletonList(new AmountCredited()));
-            fundsTransfer.completed();
-        } else fundsTransfer.creditFailed();
+            apply(outcome.get(), singletonList(new AmountCredited()), AmountCredited.class.getSimpleName());
+            command.transfer.completed(command);
+        } else command.transfer.creditFailed(command);
     }
 
     @Override

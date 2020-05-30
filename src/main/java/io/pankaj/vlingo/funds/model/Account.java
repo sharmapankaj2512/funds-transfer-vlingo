@@ -1,5 +1,6 @@
 package io.pankaj.vlingo.funds.model;
 
+import io.pankaj.vlingo.funds.model.FundsTransfer.FundsTransferCommand;
 import io.vlingo.actors.Address;
 import io.vlingo.actors.Definition;
 import io.vlingo.actors.Stage;
@@ -23,9 +24,9 @@ public interface Account {
 
     Completes<Outcome<RuntimeException, AccountState>> debit(float amount);
 
-    void debit(float balance, FundsTransfer fundsTransfer, Account to);
+    void debit(FundsTransferCommand command);
 
-    void credit(float amount, FundsTransfer fundsTransfer);
+    void credit(FundsTransferCommand command);
 
     class AccountOpened extends DomainEvent {}
     class AmountCredited extends DomainEvent {}
