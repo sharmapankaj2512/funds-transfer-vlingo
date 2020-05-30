@@ -7,11 +7,10 @@
 
 package io.pankaj.vlingo.funds.infra.persistence;
 
-import io.pankaj.vlingo.funds.model.FundsTransferState;
+import io.pankaj.vlingo.funds.model.AccountState;
 import io.vlingo.actors.Definition;
 import io.vlingo.actors.Protocols;
 import io.vlingo.actors.Stage;
-import io.pankaj.vlingo.funds.model.AccountState;
 import io.vlingo.lattice.model.stateful.StatefulTypeRegistry;
 import io.vlingo.lattice.model.stateful.StatefulTypeRegistry.Info;
 import io.vlingo.symbio.EntryAdapterProvider;
@@ -39,7 +38,6 @@ public class CommandModelStoreProvider {
 
         StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(stage.world());
         stateAdapterProvider.registerAdapter(AccountState.class, new AccountStateAdapter());
-        stateAdapterProvider.registerAdapter(FundsTransferState.class, new FundsTransferStateAdapter());
         new EntryAdapterProvider(stage.world()); // future
 
         Protocols storeProtocols =
@@ -60,6 +58,5 @@ public class CommandModelStoreProvider {
         this.dispatcherControl = dispatcherControl;
 
         registry.register(new Info(store, AccountState.class, AccountState.class.getSimpleName()));
-        registry.register(new Info(store, FundsTransferState.class, FundsTransferState.class.getSimpleName()));
     }
 }

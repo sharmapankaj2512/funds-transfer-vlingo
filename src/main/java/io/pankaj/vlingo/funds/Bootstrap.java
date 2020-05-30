@@ -10,12 +10,17 @@ package io.pankaj.vlingo.funds;
 import io.pankaj.vlingo.funds.infra.persistence.CommandModelStoreProvider;
 import io.pankaj.vlingo.funds.infra.persistence.ProjectionDispatcherProvider;
 import io.pankaj.vlingo.funds.infra.persistence.QueryModelStoreProvider;
+import io.pankaj.vlingo.funds.model.FundsTransferEntity;
 import io.pankaj.vlingo.funds.resource.AccountResource;
 import io.pankaj.vlingo.funds.resource.FundsTransferResource;
 import io.vlingo.actors.World;
 import io.vlingo.http.resource.Resources;
 import io.vlingo.http.resource.Server;
+import io.vlingo.lattice.model.sourcing.SourcedTypeRegistry;
 import io.vlingo.lattice.model.stateful.StatefulTypeRegistry;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.journal.Journal;
+import io.vlingo.symbio.store.journal.inmemory.InMemoryJournalActor;
 
 /**
  * Start the service with a Server.
@@ -57,6 +62,15 @@ public class Bootstrap {
 
     QueryModelStoreProvider.using(world.stage(), registry);
     CommandModelStoreProvider.using(world.stage(), registry, ProjectionDispatcherProvider.using(world.stage()).storeDispatcher);
+
+    final Journal<String> journal = Journal.using(world.stage(),
+            InMemoryJournalActor.class,
+            ProjectionDispatcherProvider.using(world.stage()).storeDispatcher);
+
+    final SourcedTypeRegistry registry = new SourcedTypeRegistry(world);
+    registry.register(new SourcedTypeRegistry.Info(journal,
+            FundsTransferEntity.class,
+            FundsTransferEntity.class.getSimpleName()));
 
     AccountResource accountResource = new AccountResource(this.world);
     FundsTransferResource transferResource = new FundsTransferResource(this.world);

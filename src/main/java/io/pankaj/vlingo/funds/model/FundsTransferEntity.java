@@ -1,10 +1,12 @@
 package io.pankaj.vlingo.funds.model;
 
+import io.pankaj.vlingo.funds.model.FundsTransfer.FundsTransferEvents.*;
 import io.vlingo.common.Completes;
-import io.vlingo.lattice.model.Command;
-import io.vlingo.lattice.model.stateful.StatefulEntity;
+import io.vlingo.lattice.model.sourcing.EventSourced;
 
-public class FundsTransferEntity extends StatefulEntity<FundsTransferState> implements FundsTransfer {
+import java.util.function.BiConsumer;
+
+public class FundsTransferEntity extends EventSourced implements FundsTransfer {
     private FundsTransferState state;
 
     // when new
@@ -18,47 +20,78 @@ public class FundsTransferEntity extends StatefulEntity<FundsTransferState> impl
     }
 
     @Override
-    protected void state(FundsTransferState state) {
-        this.state = state;
-    }
-
-    @Override
-    protected Class<FundsTransferState> stateType() {
-        return FundsTransferState.class;
-    }
-
-    @Override
-    public Completes<FundsTransferState> initiate(FundsTransferCommand command) {
+    public Completes<String> initiate(FundsTransferCommand command) {
         if (state == null) {
-            return apply(FundsTransferState.has(id), () -> {
-                command.from.debit(command);
-                return state;
-            });
-        } else {
-            return completes().with(state);
+            apply(new FundsTransferInitiated());
+            command.from.debit(command);
         }
+        return completes().with(streamName);
     }
 
     @Override
     public void amountDebited(FundsTransferCommand command) {
-        apply(FundsTransferState.debitSucceeded(id));
+        apply(new AmountDebitedFromSource());
         command.to.credit(command);
     }
 
     @Override
     public void debitFailed(FundsTransferCommand command) {
-        apply(FundsTransferState.debitFailed(id));
+         apply(new DebitFromSourceFailed());
     }
 
     @Override
     public void completed(FundsTransferCommand command) {
-        apply(FundsTransferState.completed(id));
+        apply(new FundsTransferCompleted());
     }
 
     @Override
     public void creditFailed(FundsTransferCommand command) {
-        apply(FundsTransferState.creditFailed(id));
-        apply(FundsTransferState.debitRollbackInitiated(id));
+        apply(new CreditToBeneficiaryFailed());
+        apply(new RollingBackDebitFromSource());
         command.from.credit(command);
+    }
+
+    static {
+        BiConsumer<FundsTransferEntity, FundsTransferInitiated> transferInitiated = FundsTransferEntity::applyCreated;
+        EventSourced.registerConsumer(FundsTransferEntity.class, FundsTransferInitiated.class, transferInitiated);
+
+        BiConsumer<FundsTransferEntity, AmountDebitedFromSource> amountDebited = FundsTransferEntity::applyAmountDebited;
+        EventSourced.registerConsumer(FundsTransferEntity.class, AmountDebitedFromSource.class, amountDebited);
+
+        BiConsumer<FundsTransferEntity, DebitFromSourceFailed> debitFailed = FundsTransferEntity::applyDebitFailed;
+        EventSourced.registerConsumer(FundsTransferEntity.class, DebitFromSourceFailed.class, debitFailed);
+
+        BiConsumer<FundsTransferEntity, FundsTransferCompleted> completed = FundsTransferEntity::applyCompleted;
+        EventSourced.registerConsumer(FundsTransferEntity.class, FundsTransferCompleted.class, completed);
+
+        BiConsumer<FundsTransferEntity, CreditToBeneficiaryFailed> creditFailed = FundsTransferEntity::applyCreditFailed;
+        EventSourced.registerConsumer(FundsTransferEntity.class, CreditToBeneficiaryFailed.class, creditFailed);
+
+        BiConsumer<FundsTransferEntity, RollingBackDebitFromSource> debitRolledBack = FundsTransferEntity::applyDebitRolledBack;
+        EventSourced.registerConsumer(FundsTransferEntity.class, RollingBackDebitFromSource.class, debitRolledBack);
+    }
+
+    void applyCreated(FundsTransferInitiated event) {
+        this.state = FundsTransferState.has(streamName);
+    }
+
+    void applyAmountDebited(AmountDebitedFromSource event) {
+        this.state = FundsTransferState.debitSucceeded(streamName);
+    }
+
+    void applyDebitFailed(DebitFromSourceFailed event) {
+        this.state = FundsTransferState.debitFailed(streamName);
+    }
+
+    void applyCompleted(FundsTransferCompleted event) {
+        this.state = FundsTransferState.completed(streamName);
+    }
+
+    void applyCreditFailed(CreditToBeneficiaryFailed event) {
+        this.state = FundsTransferState.creditFailed(streamName);
+    }
+
+    void applyDebitRolledBack(RollingBackDebitFromSource event) {
+        this.state = FundsTransferState.debitRollbackInitiated(streamName);
     }
 }

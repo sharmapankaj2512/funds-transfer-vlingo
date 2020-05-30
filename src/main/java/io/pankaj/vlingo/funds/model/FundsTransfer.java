@@ -5,9 +5,10 @@ import io.vlingo.actors.Definition;
 import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
 import io.vlingo.lattice.model.Command;
+import io.vlingo.lattice.model.DomainEvent;
 
 public interface FundsTransfer {
-    static Completes<FundsTransferState> initiate(Stage stage, Account from, Account to, float amount) {
+    static Completes<String> initiate(Stage stage, Account from, Account to, float amount) {
         Address address = stage.world().addressFactory().uniquePrefixedWith("a-");
         FundsTransfer transfer = stage.actorFor(FundsTransfer.class,
                 Definition.has(
@@ -16,7 +17,7 @@ public interface FundsTransfer {
         return transfer.initiate(new FundsTransferCommand(from, to, amount, transfer));
     }
 
-    Completes<FundsTransferState> initiate(FundsTransferCommand command);
+    Completes<String> initiate(FundsTransferCommand command);
 
     void amountDebited(FundsTransferCommand command);
 
@@ -38,5 +39,14 @@ public interface FundsTransfer {
             this.amount = amount;
             this.transfer = transfer;
         }
+    }
+
+    class FundsTransferEvents {
+        static class FundsTransferInitiated extends DomainEvent {}
+        static class AmountDebitedFromSource extends DomainEvent {}
+        static class DebitFromSourceFailed extends DomainEvent {}
+        static class FundsTransferCompleted extends DomainEvent {}
+        static class CreditToBeneficiaryFailed extends DomainEvent {}
+        static class RollingBackDebitFromSource extends DomainEvent {}
     }
 }

@@ -21,17 +21,17 @@ import java.util.List;
 
 @SuppressWarnings("rawtypes")
 public class ProjectionDispatcherProvider {
-    private static ProjectionDispatcherProvider instance;
+//    private static ProjectionDispatcherProvider instance;
 
     public final ProjectionDispatcher projectionDispatcher;
     public final Dispatcher storeDispatcher;
 
-    public static ProjectionDispatcherProvider instance() {
-        return instance;
-    }
+//    public static ProjectionDispatcherProvider instance() {
+//        return instance;
+//    }
 
     public static ProjectionDispatcherProvider using(final Stage stage) {
-        if (instance != null) return instance;
+//        if (instance != null) return instance;
 
         final List<ProjectToDescription> descriptions =
                 Arrays.asList(new ProjectToDescription(
@@ -47,9 +47,7 @@ public class ProjectionDispatcherProvider {
 
         final Protocols.Two<Dispatcher, ProjectionDispatcher> dispatchers = Protocols.two(dispatcherProtocols);
 
-        instance = new ProjectionDispatcherProvider(dispatchers._1, dispatchers._2);
-
-        return instance;
+        return new ProjectionDispatcherProvider(dispatchers._1, dispatchers._2);
     }
 
     private ProjectionDispatcherProvider(final Dispatcher storeDispatcher, final ProjectionDispatcher projectionDispatcher) {

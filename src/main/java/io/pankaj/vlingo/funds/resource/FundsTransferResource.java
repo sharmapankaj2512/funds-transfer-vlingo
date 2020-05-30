@@ -38,8 +38,8 @@ public class FundsTransferResource {
                         .andThenTo(to -> FundsTransfer.initiate(world.stage(), from, to, data.amount)))
                 .andThenTo(state -> Completes.withSuccess(Response.of(
                         Created,
-                        headers(ResponseHeader.of(Location, "/transfers/" + state.id)),
-                        serialized(state.id))));
+                        headers(ResponseHeader.of(Location, "/transfers/" + state)),
+                        serialized(state))));
     }
 
     private Completes<Account> resolve(final String id) {
