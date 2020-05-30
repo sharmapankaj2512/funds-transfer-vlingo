@@ -7,6 +7,7 @@
 
 package io.pankaj.vlingo.funds.infra.persistence;
 
+import io.pankaj.vlingo.funds.infra.FundsTransferTransactionData;
 import io.vlingo.common.Completes;
 import io.pankaj.vlingo.funds.infra.AccountData;
 
@@ -15,4 +16,6 @@ import io.pankaj.vlingo.funds.infra.AccountData;
  */
 public interface Queries {
     Completes<AccountData> accountOf(String id);
+
+    Completes<FundsTransferTransactionData> transaction(String id);
 }

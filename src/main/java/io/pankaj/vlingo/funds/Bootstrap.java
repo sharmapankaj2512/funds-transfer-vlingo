@@ -7,10 +7,10 @@
 
 package io.pankaj.vlingo.funds;
 
+import io.pankaj.vlingo.funds.infra.persistence.CommandModelJournalProvider;
 import io.pankaj.vlingo.funds.infra.persistence.CommandModelStoreProvider;
 import io.pankaj.vlingo.funds.infra.persistence.ProjectionDispatcherProvider;
 import io.pankaj.vlingo.funds.infra.persistence.QueryModelStoreProvider;
-import io.pankaj.vlingo.funds.model.FundsTransferEntity;
 import io.pankaj.vlingo.funds.resource.AccountResource;
 import io.pankaj.vlingo.funds.resource.FundsTransferResource;
 import io.vlingo.actors.World;
@@ -18,94 +18,38 @@ import io.vlingo.http.resource.Resources;
 import io.vlingo.http.resource.Server;
 import io.vlingo.lattice.model.sourcing.SourcedTypeRegistry;
 import io.vlingo.lattice.model.stateful.StatefulTypeRegistry;
-import io.vlingo.symbio.store.dispatch.Dispatcher;
-import io.vlingo.symbio.store.journal.Journal;
-import io.vlingo.symbio.store.journal.inmemory.InMemoryJournalActor;
 
 /**
  * Start the service with a Server.
  */
 public class Bootstrap {
-  private static Bootstrap instance;
-  private static int Port = 18080;
+    private static int Port = 18080;
 
-  private final StatefulTypeRegistry registry;
+    public static void main(String[] args) {
+        World world = World.startWithDefaults("funds-transfer");
 
-  public final Server server;
-  public final World world;
+        StatefulTypeRegistry registry = new StatefulTypeRegistry(world);
+        SourcedTypeRegistry sourcedTypeRegistry = new SourcedTypeRegistry(world);
 
-  public static final Bootstrap instance() {
-    if (instance == null) {
-      instance = new Bootstrap(Port);
+        QueryModelStoreProvider.using(world.stage(), registry);
+        CommandModelStoreProvider.using(world.stage(), registry, ProjectionDispatcherProvider.using(world.stage()).storeDispatcher);
+        CommandModelJournalProvider.using(world.stage(), sourcedTypeRegistry, ProjectionDispatcherProvider.using(world.stage()).storeDispatcher);
+
+        AccountResource accountResource = new AccountResource(world);
+        FundsTransferResource transferResource = new FundsTransferResource(world);
+
+        Server server =
+                Server.startWithAgent(
+                        world.stage(),
+                        Resources.are(
+                                accountResource.routes(),
+                                transferResource.routes()),
+                        Port,
+                        2);
+
+        world.defaultLogger().info("============================================");
+        world.defaultLogger().info("Started funds-transfer service on port " + Port);
+        world.defaultLogger().info("============================================");
     }
 
-    return instance;
-  }
-
-  public static void main(String[] args) {
-    int port;
-
-    try {
-      port = Integer.parseInt(args[0]);
-    } catch (Exception e) {
-      port = Port;
-      System.out.println("hello-world: Command line does not provide a valid port; defaulting to: " + port);
-    }
-
-    instance = new Bootstrap(port);
-  }
-
-  private Bootstrap(int port) {
-    this.world = World.startWithDefaults("funds-transfer");
-
-    registry = new StatefulTypeRegistry(world);
-
-    QueryModelStoreProvider.using(world.stage(), registry);
-    CommandModelStoreProvider.using(world.stage(), registry, ProjectionDispatcherProvider.using(world.stage()).storeDispatcher);
-
-    final Journal<String> journal = Journal.using(world.stage(),
-            InMemoryJournalActor.class,
-            ProjectionDispatcherProvider.using(world.stage()).storeDispatcher);
-
-    final SourcedTypeRegistry registry = new SourcedTypeRegistry(world);
-    registry.register(new SourcedTypeRegistry.Info(journal,
-            FundsTransferEntity.class,
-            FundsTransferEntity.class.getSimpleName()));
-
-    AccountResource accountResource = new AccountResource(this.world);
-    FundsTransferResource transferResource = new FundsTransferResource(this.world);
-
-    this.server =
-            Server.startWithAgent(
-                    world.stage(),
-                    Resources.are(
-                            accountResource.routes(),
-                            transferResource.routes()),
-                    port,
-                    2);
-
-    registerShutdownHook();
-
-    world.defaultLogger().info("============================================");
-    world.defaultLogger().info("Started funds-transfer service on port " + port );
-    world.defaultLogger().info("============================================");
-  }
-
-  private void registerShutdownHook() {
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        if (instance != null) {
-          server.stop();
-
-          world.defaultLogger().info("\n");
-          world.defaultLogger().info("========================");
-          world.defaultLogger().info("Stopping funds-transfer... ");
-          world.defaultLogger().info("========================");
-          
-          world.terminate();
-        }
-      }
-    });
-  }
 }

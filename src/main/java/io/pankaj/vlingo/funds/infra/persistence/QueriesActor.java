@@ -7,6 +7,7 @@
 
 package io.pankaj.vlingo.funds.infra.persistence;
 
+import io.pankaj.vlingo.funds.infra.FundsTransferTransactionData;
 import io.vlingo.common.Completes;
 import io.pankaj.vlingo.funds.infra.AccountData;
 import io.vlingo.lattice.query.StateStoreQueryActor;
@@ -23,5 +24,10 @@ public class QueriesActor extends StateStoreQueryActor implements Queries {
   @Override
   public Completes<AccountData> accountOf(String id) {
     return queryStateFor(id, AccountData.class, AccountData.empty());
+  }
+
+  @Override
+  public Completes<FundsTransferTransactionData> transaction(String id) {
+    return queryStateFor(id, FundsTransferTransactionData.class, FundsTransferTransactionData.empty());
   }
 }

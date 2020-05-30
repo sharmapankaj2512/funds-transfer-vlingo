@@ -41,12 +41,47 @@ public interface FundsTransfer {
         }
     }
 
-    class FundsTransferEvents {
-        static class FundsTransferInitiated extends DomainEvent {}
-        static class AmountDebitedFromSource extends DomainEvent {}
-        static class DebitFromSourceFailed extends DomainEvent {}
-        static class FundsTransferCompleted extends DomainEvent {}
-        static class CreditToBeneficiaryFailed extends DomainEvent {}
-        static class RollingBackDebitFromSource extends DomainEvent {}
+    class FundsTransferEvents extends DomainEvent {
+        public final String id;
+
+        FundsTransferEvents(String id) {
+            this.id = id;
+        }
+
+        public static class FundsTransferInitiated extends FundsTransferEvents {
+            FundsTransferInitiated(String id) {
+                super(id);
+            }
+        }
+
+        public static class AmountDebitedFromSource extends FundsTransferEvents {
+            AmountDebitedFromSource(String id) {
+                super(id);
+            }
+        }
+
+        public static class DebitFromSourceFailed extends FundsTransferEvents {
+            DebitFromSourceFailed(String id) {
+                super(id);
+            }
+        }
+
+        public static class FundsTransferCompleted extends FundsTransferEvents {
+            FundsTransferCompleted(String id) {
+                super(id);
+            }
+        }
+
+        public static class CreditToBeneficiaryFailed extends FundsTransferEvents {
+            CreditToBeneficiaryFailed(String id) {
+                super(id);
+            }
+        }
+
+        public static class RollingBackDebitFromSource extends FundsTransferEvents {
+            RollingBackDebitFromSource(String id) {
+                super(id);
+            }
+        }
     }
 }

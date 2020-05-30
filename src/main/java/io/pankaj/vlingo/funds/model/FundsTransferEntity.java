@@ -3,6 +3,7 @@ package io.pankaj.vlingo.funds.model;
 import io.pankaj.vlingo.funds.model.FundsTransfer.FundsTransferEvents.*;
 import io.vlingo.common.Completes;
 import io.vlingo.lattice.model.sourcing.EventSourced;
+import io.vlingo.symbio.Metadata;
 
 import java.util.function.BiConsumer;
 
@@ -22,7 +23,7 @@ public class FundsTransferEntity extends EventSourced implements FundsTransfer {
     @Override
     public Completes<String> initiate(FundsTransferCommand command) {
         if (state == null) {
-            apply(new FundsTransferInitiated());
+            apply(new FundsTransferInitiated(streamName));
             command.from.debit(command);
         }
         return completes().with(streamName);
@@ -30,24 +31,24 @@ public class FundsTransferEntity extends EventSourced implements FundsTransfer {
 
     @Override
     public void amountDebited(FundsTransferCommand command) {
-        apply(new AmountDebitedFromSource());
+        apply(new AmountDebitedFromSource(streamName));
         command.to.credit(command);
     }
 
     @Override
     public void debitFailed(FundsTransferCommand command) {
-         apply(new DebitFromSourceFailed());
+         apply(new DebitFromSourceFailed(streamName));
     }
 
     @Override
     public void completed(FundsTransferCommand command) {
-        apply(new FundsTransferCompleted());
+        apply(new FundsTransferCompleted(streamName));
     }
 
     @Override
     public void creditFailed(FundsTransferCommand command) {
-        apply(new CreditToBeneficiaryFailed());
-        apply(new RollingBackDebitFromSource());
+        apply(new CreditToBeneficiaryFailed(streamName));
+        apply(new RollingBackDebitFromSource(streamName));
         command.from.credit(command);
     }
 

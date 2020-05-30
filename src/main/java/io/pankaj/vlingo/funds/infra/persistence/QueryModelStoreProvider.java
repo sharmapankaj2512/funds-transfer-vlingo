@@ -7,6 +7,7 @@
 
 package io.pankaj.vlingo.funds.infra.persistence;
 
+import io.pankaj.vlingo.funds.infra.FundsTransferTransactionData;
 import io.vlingo.actors.Stage;
 import io.pankaj.vlingo.funds.infra.AccountData;
 import io.vlingo.lattice.model.stateful.StatefulTypeRegistry;
@@ -34,6 +35,7 @@ public class QueryModelStoreProvider {
 
         final StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(stage.world());
         stateAdapterProvider.registerAdapter(AccountData.class, new AccountDataStateAdapter());
+        stateAdapterProvider.registerAdapter(FundsTransferTransactionData.class, new FundsTransferTransactionDataStateAdapter());
         new EntryAdapterProvider(stage.world()); // future
 
         final StateStore store = stage.actorFor(StateStore.class, InMemoryStateStoreActor.class, Arrays.asList(new NoOpDispatcher()));
@@ -51,5 +53,6 @@ public class QueryModelStoreProvider {
         this.queries = queries;
 
         registry.register(new Info(store, AccountData.class, AccountData.class.getSimpleName()));
+        registry.register(new Info(store, FundsTransferTransactionData.class, FundsTransferTransactionData.class.getSimpleName()));
     }
 }

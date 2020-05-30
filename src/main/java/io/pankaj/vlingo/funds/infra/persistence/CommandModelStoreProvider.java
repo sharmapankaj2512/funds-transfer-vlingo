@@ -8,6 +8,7 @@
 package io.pankaj.vlingo.funds.infra.persistence;
 
 import io.pankaj.vlingo.funds.model.AccountState;
+import io.pankaj.vlingo.funds.model.FundsTransferState;
 import io.vlingo.actors.Definition;
 import io.vlingo.actors.Protocols;
 import io.vlingo.actors.Stage;

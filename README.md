@@ -26,4 +26,5 @@ curl -i -X PATCH -H "Content-Type: application/json" http://localhost:18080/acco
 curl -i -X POST -H "Content-Type: application/json" -d '{"from":"64", "to": "65", "amount": 10}' http://localhost:18080/transfers
 curl -i -X GET -H "Content-Type: application/json" http://localhost:18080/accounts/64
 curl -i -X GET -H "Content-Type: application/json" http://localhost:18080/accounts/65
+❯ curl -i -X GET -H "Content-Type: application/json" http://localhost:18080/transfers/73
 ```
