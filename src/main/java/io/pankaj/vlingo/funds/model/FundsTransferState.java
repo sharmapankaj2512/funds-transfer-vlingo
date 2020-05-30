@@ -29,7 +29,11 @@ public class FundsTransferState {
         return new FundsTransferState(id, Status.CreditFailed);
     }
 
+    public static FundsTransferState debitRollbackInitiated(String id) {
+        return new FundsTransferState(id, Status.DebitRolledBack);
+    }
+
     public enum Status {
-        Initiated, DebitFailed, DebitSucceeded, Completed, CreditFailed;
+        Initiated, DebitFailed, DebitSucceeded, Completed, CreditFailed, DebitRolledBack;
     }
 }

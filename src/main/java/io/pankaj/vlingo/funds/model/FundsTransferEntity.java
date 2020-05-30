@@ -58,5 +58,7 @@ public class FundsTransferEntity extends StatefulEntity<FundsTransferState> impl
     @Override
     public void creditFailed(FundsTransferCommand command) {
         apply(FundsTransferState.creditFailed(id));
+        apply(FundsTransferState.debitRollbackInitiated(id));
+        command.from.credit(command);
     }
 }
