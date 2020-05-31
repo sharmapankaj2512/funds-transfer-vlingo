@@ -37,10 +37,6 @@ public class CommandModelStoreProvider {
     public static CommandModelStoreProvider using(Stage stage, StatefulTypeRegistry registry, Dispatcher dispatcher) {
         if (instance != null) return instance;
 
-        StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(stage.world());
-        stateAdapterProvider.registerAdapter(AccountState.class, new AccountStateAdapter());
-        new EntryAdapterProvider(stage.world()); // future
-
         Protocols storeProtocols =
                 stage.actorFor(
                         new Class<?>[]{StateStore.class, DispatcherControl.class},
@@ -48,15 +44,19 @@ public class CommandModelStoreProvider {
 
         Protocols.Two<StateStore, DispatcherControl> storeWithControl = Protocols.two(storeProtocols);
 
-        instance = new CommandModelStoreProvider(registry, storeWithControl._1, storeWithControl._2);
+        instance = new CommandModelStoreProvider(stage, registry, storeWithControl._1, storeWithControl._2);
 
         return instance;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private CommandModelStoreProvider(StatefulTypeRegistry registry, StateStore store, DispatcherControl dispatcherControl) {
+    public CommandModelStoreProvider(Stage stage, StatefulTypeRegistry registry, StateStore store, DispatcherControl dispatcherControl) {
         this.store = store;
         this.dispatcherControl = dispatcherControl;
+
+        StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(stage.world());
+        stateAdapterProvider.registerAdapter(AccountState.class, new AccountStateAdapter());
+        new EntryAdapterProvider(stage.world()); // future
 
         registry.register(new Info(store, AccountState.class, AccountState.class.getSimpleName()));
     }
