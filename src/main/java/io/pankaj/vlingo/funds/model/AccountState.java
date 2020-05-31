@@ -32,6 +32,7 @@ public class AccountState {
     }
 
     public Outcome<RuntimeException, AccountState> withdraw(float amount) {
+        if (balance <= amount) return Failure.of(new IllegalArgumentException("Insufficient balance"));
         if (amount <= 0) return Failure.of(new IllegalArgumentException("Invalid amount"));
         return Success.of(new AccountState(id, userId, balance - amount));
     }

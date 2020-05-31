@@ -3,6 +3,7 @@ package io.pankaj.vlingo.funds.model;
 import io.pankaj.vlingo.funds.infra.persistence.CommandModelStoreProvider;
 import io.vlingo.actors.Definition;
 import io.vlingo.actors.World;
+import io.vlingo.common.Failure;
 import io.vlingo.common.Outcome;
 import io.vlingo.lattice.model.stateful.StatefulTypeRegistry;
 import io.vlingo.symbio.store.state.StateStore;
@@ -13,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 public class AccountEntityTest {
@@ -66,6 +68,14 @@ public class AccountEntityTest {
         float balanceAfterDebit = outcome.get().balance;
 
         Assertions.assertThat(balanceAfterDebit).isEqualTo(0);
+    }
+
+    @Test
+    public void debit_shouldFailWhenThereIsNotEnoughBalance() {
+        account.openFor(UserId).await();
+        Outcome<RuntimeException, AccountState> outcome = account.debit(10).await();
+
+        Assertions.assertThat(outcome.asOptional()).isEqualTo(Optional.empty());
     }
 
 }
