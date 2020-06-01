@@ -34,3 +34,8 @@ curl -i -X GET -H "Content-Type: application/json" http://localhost:18080/accoun
 curl -i -X GET -H "Content-Type: application/json" http://localhost:18080/accounts/65
 ❯ curl -i -X GET -H "Content-Type: application/json" http://localhost:18080/transfers/73
 ```
+
+
+##### REFERENCES
+[Vlingo documentation](https://docs.vlingo.io/)
+[Vlingo Hello - World](https://github.com/vlingo/vlingo-helloworld)
