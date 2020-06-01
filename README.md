@@ -17,6 +17,12 @@ DEPOSIT AMOUNT
 curl -i -X PATCH -H "Content-Type: application/json" http://localhost:18080/accounts/85/balance/10
 ```
 
+WITHDRAW AMOUNT
+
+```
+curl -i -X DELETE -H "Content-Type: application/json" http://localhost:18080/accounts/85/balance/10
+```
+
 FUNDS TRANSFER
 
 ```
