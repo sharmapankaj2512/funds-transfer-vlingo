@@ -37,5 +37,5 @@ curl -i -X GET -H "Content-Type: application/json" http://localhost:18080/accoun
 
 
 ##### REFERENCES
-[Vlingo documentation](https://docs.vlingo.io/)
-[Vlingo Hello - World](https://github.com/vlingo/vlingo-helloworld)
+- [Vlingo documentation](https://docs.vlingo.io/)
+- [Vlingo Hello - World](https://github.com/vlingo/vlingo-helloworld)
