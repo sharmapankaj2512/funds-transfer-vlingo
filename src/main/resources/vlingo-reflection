@@ -1,0 +1,2 @@
+io.pankaj.vlingo.funds.infra.persistence.ProjectionDispatcherProvider
+io.pankaj.vlingo.funds.infra.persistence.CommandModelStoreProvider

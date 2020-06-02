@@ -38,6 +38,11 @@
       <version>1.2.21-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>io.vlingo</groupId>
+      <artifactId>vlingo-build-plugins</artifactId>
+      <version>1.2.21-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>3.16.1</version>
@@ -46,6 +51,30 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>io.vlingo</groupId>
+        <artifactId>vlingo-build-plugins</artifactId>
+        <version>1.2.21-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>generateProxies</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>nativeActorProxyGen</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <additionalProtocols>
+            <param>io.vlingo.symbio.store.dispatch.Dispatcher</param>
+            <param>io.vlingo.lattice.model.projection.ProjectionDispatcher</param>
+            <param>io.vlingo.symbio.store.state.StateStore</param>
+            <param>io.vlingo.symbio.store.dispatch.DispatcherControl</param>
+            <param>io.pankaj.vlingo.funds.infra.persistence.ProjectionDispatcherProvider</param>
+            <param>io.pankaj.vlingo.funds.infra.persistence.CommandModelStoreProvider</param>
+          </additionalProtocols>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
